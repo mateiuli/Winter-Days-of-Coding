@@ -64,7 +64,7 @@ int level_read(const char *filename, level_t *level)
 
 			/* Calculam pozitia caramizii. */
 			sfVector2f brick_pos = {
-				.x = 1.6f * j * BRICK_WIDTH + 100.0f, 
+				.x = 1.6f * j * BRICK_WIDTH + 120.0f, 
 				.y = 2.0f * i * BRICK_HEIGHT + 50.0f
 			};
 
