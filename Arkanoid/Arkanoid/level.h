@@ -5,7 +5,7 @@
 #define MAX_ROWS 32
 
 #define BRICK_WIDTH		40
-#define BRICK_HEIGHT	25
+#define BRICK_HEIGHT	39
 
 typedef struct
 {
@@ -13,7 +13,7 @@ typedef struct
 	int rows;
 	
 	/* Numarul de coloane de caramizi. */
-	int cols;
+	int cols; 
 	
 	/* Matricea cu caramizi - numarul de lovituri 
 	 * pana la distrugerea unei caramizi. */
@@ -31,3 +31,4 @@ typedef struct
  * valoarea 0. In caz de succes, 1 este returnat.
  */
 int level_read(const char *filename, level_t *level);
+void level_update(level_t *level);

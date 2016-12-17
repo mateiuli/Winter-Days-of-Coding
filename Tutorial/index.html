@@ -1,0 +1,347 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<title>Winter Days of Coding - Piatra-Neamt 2016</title>
+	<script type="text/javascript" src="syntax/scripts/shCore.js"></script>
+	<script type="text/javascript" src="syntax/scripts/shBrushCpp.js"></script>
+	<link type="text/css" rel="stylesheet" href="syntax/styles/shCoreDefault.css"/>
+	<link type="text/css" rel="stylesheet" href="syntax/style.css"/>
+	<script type="text/javascript">SyntaxHighlighter.all();</script>
+</head>
+
+<body>
+	<div id="title">
+		<img src="images/logo.png" height="145px" />
+	</div>
+
+	<p>
+		<h2>Cuprins</h2>
+		<ol>
+			<li><a href="#intro">Ce este OpenGL? Cum se fac jocurile?</a></li>
+			<li><a href="#prepare">Pregatirea mediului de lucru</a></li>
+			<li><a href="#csfml">Biblioteca CSFML</a></li>
+			<li><a href="#anatomia">Anatomia unui joc cu SFML / CSFML</a></li>
+			<li><a href="#arkanoid">Jocul Arkanoid</a></li>
+		</ol>
+		<hr/>
+	</p>
+
+	<!-- Introducere OpenGL -->
+	<p>
+		<h2><a id="intro">1. Ce este OpenGL? Cum se fac jocurile?</a></h2>
+		<hr />
+	</p>
+
+
+	<!-- Pregatire mediu de lucru -->
+	<p>
+		<h2><a id="prepare">2. Pregatirea mediului de lucru</a></h2>
+		<hr />
+	</p>
+
+
+	<!-- CSFML -->
+	<p>
+		<h2><a id="csfml">3. Biblioteca SFML / CSFML</a></h2>
+		<b>SFML</b> este o biblioteca open-source cu ajutorul careia se pot realiza jocuri 2D. Aceasta biblioteca expune functionalitatile de nivel jos OpenGL intr-un <b>API (Application Programming Interface)</b> prietenos, simplu si usor de folosit.
+		Numele bibliotecii, <b>SFML</b>, vine de la <b>Simple and Fast Multimedia Library</b>. Site-ul oficial este <a href="http://www.sfml-dev.org/" target="_blank">www.sfml-dev.org</a>. Acolo puteti gasi mult mai multe informatii despre biblioteca, tutoriale, referinte si chiar si un forum unde exista o comunitate extrem de activa.
+
+		<br/></br>
+		Vom folosi aceasta biblioteca deoarece este mult mai usor de folosit si de inteles decat apelurile directe puse la dispozitie de catre OpenGL. Scopul acestui tutorial este de a reprezenta o introducere rapida in OpenGL prin intermediul unui framework de nivel mai inalt. 
+		<br/></br>
+
+		Exista variatii ale acestei biblioteci pentru mai multe limbaje de programare, cum ar fi: C, C++, Java, Python, etc. Numele bibliotecii este adaptat in functie de limbaj: <br/>
+		<ul>
+			<li>CSFML - pentru limbajul C</li>
+			<li>SFML - pentru limbajul C++</li>
+			<li>jSFML - pentru limbajul Java</li>
+			<li>pySFML - pentru limbajul Python</li>
+			<li>SFML.Net - pentru limbajele C#, VB.Net</li>
+		</ul>
+		<br/>
+		Lista completa poate fi gasita <a href="http://www.sfml-dev.org/download/bindings.php" target="_blank">aici</a>.
+	</p>
+
+
+	<p>
+		<h3>3.1. Modulele bibliotecii CSFML / SFML / jSFML / etc.</h3>
+		Biblioteca este formată din mai multe module pe care un dezvoltator de jocuri le poate folosi în funcție de necesități. Aceste module sunt:
+
+		<ul>
+			<li><b>System</b> - modulul principal pe baza căruia sunt construite toate celelalte module. Conține funcții pentru lucrul cu vectori, matrici, șiruri de caractere și multe altele.</li>
+			
+			<li><b>Window</b> - modulul care face posibilă crearea de ferestre cu un context grafic și colectarea input-ului de la utilizator (mouse, tastatură).</li>
+			
+			<li><b>Graphics</b> - modulul care furnizează toate funcțiile necesare de creare de obiecte geometrice pe ecran, imagini, text, culori, etc. </li>
+
+			<li><b>Audio</b> - modulul oferă funcții pentru încărcarea de sunete și melodii de pe HDD și redarea lor în timpul jocului. </li>
+
+			<li><b>Network</b> - modulul acoperă partea de rețelistică, oferindu-i dezvoltatorului funcțiile necesare pentru a realiza un joc multi-player, în rețea.</li>
+		</ul>
+
+		Nu suntem obligați să folosim toate modulele dacă nu vrem. Este suficient ca în proiectul nostru să le încludem doar pe cele pe care le folosim. Pentru a putea accesa funcțiile oferite de un modul este necesar să încludem fișierul cu antetul fiecărei funcții implementate de modul (fișier .h).
+		<br/><br/>
+		De exemplu, dacă dorim doar să creăm o fereastră și să desenăm un pătrat va trebui să încludem următoarele:
+		<pre class="brush: c;">
+		#include &lt;SFML/Window.h&gt;
+		#include &lt;SFML/Graphics.h&gt;
+		</pre>
+		Dacă ne dorim să atașăm și efecte sonore jocului, e necesar să includem și definițiile din modulul aferent (SFML/Audio.h).
+	</p>
+
+	<p>
+		<h3>3.2. Modulul Graphics</h3>
+		Acest modul ne pune la dispozitie o serie de structuri ce reprezintă diferite obiecte geometrice (dreptunghi, cerc) și funcții de creare, de modificare a poziției pe ecran, de modificare a culorii, etc.
+		<br/><br/>
+
+	</p>
+
+
+	<!-- Anatomia -->
+	<p>
+		<h2><a id="anatomia">4. Anatomia unui joc cu CSFML</a></h2>
+		Până acum o mare parte din problemele rezolvate la informatica, dacă nu chiar toate, implicau ca programul să se termine după ce gasește soluția la problemă. Față de acestea, un joc nu se termina. El ruleaza în continuu și este terminat de utilizator atunci când acesta dorește să îl inchidă. 
+		<br/><br/>
+		Cu alte cuvinte, un joc este un program care rulează intr-o buclă până când utilizatorul decide să iasă din ea. Toate jocurile au o bucla principală în care au loc mai multe acțiuni, cum ar fi deplasarea jucătorului pe ecran, verificare coliziuni și randare (procesul de desenare pe ecran).
+		<pre class="brush: c;">
+
+		int main()
+		{
+			/* ... initializare resurse ...*/
+
+			while(1)
+			{
+				/* Bucla principala a jocului. */
+
+				if(user_wants_to_exit)
+					break;
+			}
+
+			/* ... eliberare resurse ... */
+
+			return 0;
+		}
+		</pre>
+	</p>
+
+	<p>
+		<h3>4.1. Fereastra principală</h3>
+		Ne dorim să realizăm un joc grafic, nu un joc în consolă. Pentru acest lucru avem nevoie să cerem sistemului de operare să creeze o astfel de fereastră pentru noi. Biblioteca CSFML ne pune la dispoziție o funcție ce îi cere mai departe sistemului de operare să creeze o fereastră cu un nume dat și o anumita dimensiune pentru noi.
+
+		<pre class="brush: c;">
+		#include &lt;stdio.h&gt;
+		#include &lt;math.h&gt;
+		#include &lt;SFML/Graphics.h&gt;
+		#include &lt;SFML/Audio.h&gt;
+
+		#define EXIT_FAILURE	-1
+		#define EXIT_SUCCESS	 0
+
+		int main()
+		{
+			/* Initializare structura cu dimensiunile fereastre. */
+			sfVideoMode videoMode = {
+				.width = 800,		/* Latimea ferestrei, in pixeli. */
+				.height = 600,		/* Inaltimea ferestrei, in pixeli. */
+				.bitsPerPixel = 32	/* Cantitatea de informatie a ficarui pixel. */
+			};
+
+			/* Crearea efectiva a ferestrei de desenare, cu dimensiunile specificate anterior. */
+			sfRenderWindow *window = sfRenderWindow_create(
+				videoMode,					/* Structura cu dimensiunile. */
+				"Winter Days of Coding",	/* Titlul ferestrei. */
+				sfClose,					/* Fereastra sa aiba buton de inchidere. */
+				NULL						/* Optional: structura cu nivelul de detalii grafice. */
+			);
+
+			while(1)
+			{
+				/* Bucla principala a jocului. */
+
+				
+			}
+
+			/* ... eliberare resurse ... */
+
+			return 0;
+		}
+		</pre>
+	</p>
+
+	<p>
+		<h4>4.2 Desenare dreptunghi</h4>
+		Un dreptunghi in CSFML este descris de structura <b>sfRectangleShape</b>. Această structură reține informații despre poziția pe ecran a obiectului, despre dimensiunea și culoarea.
+		<br/>
+		Toate funcțiile care modifică parametrii unei structuri de dreptunghi au prefixul <b>sfRectangleShape_</b>. Exemple de funcții aplicabile peste un dreptunghi: <br/><br/>
+		<ul>
+			<li>
+				<b>sfRectangleShape_create()</b>
+				<br/>
+				Aceasta funcție nu primește niciun parametru. Ea aloca memorie pentru un dreptunghi și returnează un pointer către zona de memorie alocată.
+			</li>
+			
+			<li>
+				<b>sfRectangleShape_destroy(sfRectangleShape *shape)</b>
+				<br/>
+				Aceasta funcție primește ca paremetru un pointer la o structură <b>sfRectangleShape</b> și eliberează zona de memorie ocupată de aceasta.
+			</li>
+
+			<li>
+				<b>sfRectangleShape_setPosition(sfRectangleShape *shape, sfVector2f position)</b>
+				<br/>
+				Aceasta funcție primește ca paremetru un pointer la o structură <b>sfRectangleShape</b> și un vector cu două componente (x și y) ce reprezintă coordonatele în pixeli, pe ecran, ale colțului stânga sus al dreptunghiului.
+				<br/><br/>
+				Structura <b>sfVector2f</b> are două componente de tipul float. Acest lucru îl putem observa din numele acesteia. Pe tot parcursul dezvoltării jocului vom lucra cu această structură. Ea este definită astfel:
+				<pre class="brush: c;">
+				struct sfVector2f
+				{
+					float x;
+					float y;
+				};
+				</pre>
+			</li>
+
+			<li>
+				<b>sfRectangleShape_setPosition(sfRectangleShape *shape, float angle)</b>
+				<br/>
+				Aceasta funcție primește ca paremetru un pointer la o structură <b>sfRectangleShape</b> și un număr de tip float ce reprezintă unghiul cu care să fie rotit dreptunghiul, în grade. Valoarea implicită este 0<sup>&deg;</sup>.
+			</li>
+
+			<li>
+				<b>sfRectangleShape_setScale(sfRectangleShape *shape, sfVector2f scale)</b>
+				<br/>
+				Aceasta funcție primește ca paremetru un pointer la o structură <b>sfRectangleShape</b> și un vector cu două componente (x și y) ce reprezintă lățimea, respectiv lungimea dreptunghiului.
+			</li>
+
+			<li>
+				<b>sfRectangleShape_setFillColor(sfRectangleShape *shape, sfColor color)</b>
+				<br/>
+				Aceasta funcție primește ca paremetru un pointer la o structură <b>sfRectangleShape</b> și o culoare. Funcția modifică culoarea cu care este umplut dreptunghiul. O culoare în CSFML este definită ca o structură cu 4 componente: roșu (R), verde (G), albastru (B) și alfa (A). Sistemul de reprezentare a culorii se mai numește RGBA. Sistemul RGBA este o extindere a sistemului RGB, acesta aduce în plus și transparență, canalul alfa (A). O valoare de 0 a canalului alfa reprezintă un obiect complet transparent. O valoare de 255 reprezintă un obiect opac.
+
+				<pre class="brush: c;">
+				struct sfColor
+				{
+					/**
+					 * O variabilă unsigned char este reprezentată pe 8 biți (1 byte). 
+				 	 * Valoarea minimă pe care o poate lua o astfel de variabilă
+					 * este 0 iar cea maximă este 2^8 - 1 = 256 - 1 = 255.
+					 */
+					unsigned char r; 
+					unsigned char g;
+					unsigned char b;
+					unsigned char a;
+				};
+				</pre>
+
+				Un pixel este format din 3 sub-pixeli: unul roșu, unul verde și unul albastru. Prin modificarea intensității fiecărui sub-pixel se pot obține zeci de milioane de culori.
+			</li>
+		</ul>
+
+		Acestea reprezintă doar o parte din funcțiile care pot fi aplicate peste un dreptunghi (<b>sfRectangleShape</b>). Toate funcțiile disponibile, împreună cu descrierierea acestora, pot fi găsite în <a href="res/SFML.chm">manualul bibliotecii.</a>
+		<br/><br/>
+		Observați numele funcțiilor, toate au prefixul <b>sfRectagleShape_set</b>. Pentru orice funcție care setează un parametru există și o funcție care citește acel parametru. Aceste funcții au prefixul <b>sfRectangleShape_get</b>. Ele returnează valoarea parametrului cerut (culoare, poziție, rotație, etc.).
+		
+		<h4>Exemplu</h4>
+		În funcția main înainte de bucla while(1) {...} creăm o variabilă de tipul <b>sfRectangleShape*</b>. Observați că lucram cu un pointer la o variabilă de acest tip, nu direct cu variabila. Preferăm să lucrăm așa, deoarece astfel toate formele geometrice pe care le vom definii vor fi alocate în zona de memorie numită heap. 
+		<br/><br/>
+		Simplificat, când sistemul de operare lansează în execuție un program, acesta îi alocă programului două zone de memorie: o zonă de stivă (unde sunt salvate variabilele locale ale funcțiilor, apelurile de funcții, valorile de return, etc.), și o zonă de heap (aici sunt salvate variabilele alocate dinamic). Dimensiunea stivei este mult mai mică față de dimensiunea heap-ului.
+		<br/><br/>
+		<div class="box">
+			<h4>Recapitulare alocare dinamica in C</h4>
+			Se realizează cu funția <b>mallloc()</b>. Ea primește un singur parametru ce reprezintă numărul de bytes ce trebuie alocați. De obicei, o variabilă int are 4 bytes, una double 8 bytes, una char are 1 byte. Dimensiunea acestora poate depinde de la compilator la compilator, dar și de arhitectură (32 sau 64 de biți). 
+			<br/><br/>
+			Funcția <b>malloc</b> returnează adresa de memorie la care a fost alocată variabila. Pentru a accesa valoarea de la acea adresă de memorie (scriere sau citire) trebuiă să dereferențiem variabila.
+
+			<pre class="brush: c;">
+			/* Alocare variabilă de tip int pe heap. */
+			int *p = (int*)malloc(sizeof(int));
+
+			/* Scriere în variabilă. Mai întâi o dereferențiem. */
+			*p = 100;
+
+			/* Citire din variabilă - CORECT */
+			int x = *p;
+
+			/* Citire din variabilă - GREȘIT */
+			int y = p;
+
+			/* Eliberarea zonei de memorie când variabila nu mai este folosit. */
+			free(p);
+			</pre>
+
+			<h4>Recapitulare alocare dinamica in C++</h4>
+			Se realizează cu operatorul <b>new</b>. Eliberarea memoriei se face cu <b>delete</b>.
+
+			<pre class="brush: cpp;">
+			/* Alocare variabilă de tip int pe heap. */
+			int *p = new int;
+
+			/* Scriere în variabilă. Mai întâi o dereferențiem. */
+			*p = 100;
+
+			/* Citire din variabilă - CORECT */
+			int x = *p;
+
+			/* Citire din variabilă - GREȘIT */
+			int y = p;
+
+			/* Eliberarea zonei de memorie când variabila nu mai este folosit. */
+			delete p;
+			</pre>
+		</div>
+
+		
+	</p>
+
+	<p>
+		<h4>4.3. Desenare cerc</h4>
+		Dacă în cazul unui dreptunghi ne foloseam de funcțiile care aveau prefixul <b>sfRectangleShape</b>, pentru lucrul cu un cerc vom folosi funcțiile ce au prefixul <b>sfRectangleCircle</b>. Toate funcțiile descrise mai sus în cazul unui dreptunghi sunt valabile și pentru un cerc. Crearea, distrugerea, schimbarea culorii și a pozitiție se fac la fel.
+
+		<ul>
+			<li>
+				<b>sfCircleShape_create()</b>
+			</li>
+			
+			<li>
+				<b>sfCircleShape_destroy(sfCircleShape *shape)</b>
+			</li>
+
+			<li>
+				<b>sfCircleShape_setPosition(sfCircleShape *shape, sfVector2f position)</b>
+			</li>
+
+			<li>
+				<b>sfCircleShape_setPosition(sfCircleShape *shape, float angle)</b>
+			</li>
+
+			<li>
+				<b>sfCircleShape_setScale(sfCircleShape *shape, float radius)</b>
+			</li>
+
+			<li>
+				<b>sfCircleShape_setFillColor(sfCircleShape *shape, sfColor color)</b>
+			</li>
+		</ul>
+	</p>
+
+	<!-- Anatomia -->
+	<p>
+		<h2><a id="arkanoid">5. Jocul Arkanoid</a></h2>
+		<hr />
+	</p>
+
+	<p>
+		<pre class="brush: c;">
+
+		#include &lt;SFML.h&gt;
+		int main()
+		{
+			sfRectangleShape *s = sfRectangleShape_create();
+
+			return 0;
+		}
+		</pre>
+	</p>
+
+</html>

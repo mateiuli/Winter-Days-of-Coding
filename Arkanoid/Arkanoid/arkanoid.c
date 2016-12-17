@@ -3,21 +3,25 @@
 #include <stdio.h>
 #include <math.h>
 #include <SFML/Graphics.h>
+#include <SFML/Audio.h>
 #include "level.h"
 #include "utils.h"
 
 #define EXIT_FAILURE	-1
 #define EXIT_SUCCESS	 0
 
+/* Window background. */
+void window_winter_init();
+
 /* Paddle */
 void paddle_initialize(sfRectangleShape *paddle, sfVideoMode videoMode);
-void paddle_update(sfRectangleShape *paddle);
+void paddle_update(sfRectangleShape *paddle, sfVideoMode videoMode);
 
 /* Ball */
 const float ball_speed = 3.f;
 sfVector2f ball_velocity;
 void ball_initialize(sfCircleShape *ball, sfVideoMode videoMode);
-void ball_update(sfCircleShape *ball);
+int  ball_update(sfCircleShape *ball);
 void ball_check_collision_paddle(sfCircleShape *ball, sfRectangleShape *paddle);
 void ball_check_collision_level(sfCircleShape *ball, level_t *level);
 int ball_check_collision_walls(sfCircleShape *ball, sfVideoMode videoMode);
@@ -31,13 +35,22 @@ int main()
 		.bitsPerPixel = 32
 	};
 
+	/* Detalii grafice. */
+	sfContextSettings contextSettings = {
+		.depthBits = 24,
+		.stencilBits = 8,
+		.antialiasingLevel = 4,
+		.majorVersion = 3,
+		.minorVersion = 0,
+	};
+
 	/* Crearea efectiva a ferestrei de desenare, cu dimensiunile
 	   specificate anterior. */
 	sfRenderWindow *window = sfRenderWindow_create(
 		videoMode,
 		"Winter Days of Coding - Arkanoid",
 		sfClose,
-		NULL
+		&contextSettings
 	);
 	if (!window)
 		return EXIT_FAILURE;
@@ -60,6 +73,26 @@ int main()
 	/* Definire si initializare bila (ball). */
 	sfCircleShape *ball = sfCircleShape_create();
 	ball_initialize(ball, videoMode);
+
+	/* Background */
+	sfTexture *backgroundTexture = sfTexture_createFromFile("resurse/sprites/background_moon.png", NULL);
+	sfSprite *background = sfSprite_create();
+	sfSprite_setTexture(background, backgroundTexture, sfTrue);
+
+	/* Looser's TUX */
+	sfTexture *tuxTexture = sfTexture_createFromFile("resurse/tux.png", NULL);
+	sfTexture_setSmooth(tuxTexture, sfTrue);
+	sfSprite *tux = sfSprite_create();
+	sfSprite_setTexture(tux, tuxTexture, sfTrue);
+
+	sfVector2f tuxPos = { 0, 0 };
+	sfSprite_setPosition(tux, tuxPos);
+	int show_tux = 0;
+
+	/* Music */
+	sfMusic *music = sfMusic_createFromFile("resurse/music/train.ogg");
+	sfMusic_setLoop(music, sfTrue);
+	sfMusic_play(music);
 
 	/* Bucla principala a jocului. Cat timp fereastra este inca deschisa
 	   jocul continua. Cand fereastra este inchisa se va iesi din bucla. */
@@ -87,9 +120,15 @@ int main()
 		ball_check_collision_walls(ball, videoMode);
 		ball_check_collision_paddle(ball, paddle);
 		ball_check_collision_level(ball, &level);
+		level_update(&level);
 
-		ball_update(ball);
-		paddle_update(paddle);
+		if(ball_update(ball, videoMode)) {
+			if(show_tux == 0)
+				show_tux = 1;
+			//sfRenderWindow_close(window);
+		}
+
+		paddle_update(paddle, videoMode);
 
 		/* Golire fereastra. Desenarea intregii ferestre cu o culoare
 		   pentru a o pregati pentru urmatoarea etapa de randare. 
@@ -97,13 +136,19 @@ int main()
 		sfColor bgColor = {
 			.r = 17, .g = 81, .b = 137, .a = 255
 		};
+
+		/* Clear buffer. */
 		sfRenderWindow_clear(window, bgColor);
+		/* Draw background. */
+		sfRenderWindow_drawSprite(window, background, NULL);
 
 		/* Desenare obiecte in buffer-ul din spate. */
-		for (int i = 0; i < level.rows; i++) {
-			for (int j = 0; j < level.cols; j++) {
-				if(level.bricks_life[i][j] != 0)
-					sfRenderWindow_drawRectangleShape(window, level.bricks_shape[i][j], NULL);
+		if (show_tux == 0) {
+			for (int i = 0; i < level.rows; i++) {
+				for (int j = 0; j < level.cols; j++) {
+					if (level.bricks_life[i][j] != 0)
+						sfRenderWindow_drawRectangleShape(window, level.bricks_shape[i][j], NULL);
+				}
 			}
 		}
 
@@ -112,6 +157,16 @@ int main()
 
 		/* Desenare ball. */
 		sfRenderWindow_drawCircleShape(window, ball, NULL);
+
+		if (show_tux > 0 && show_tux < 150) {
+			sfVector2f scale = { 1.005f, 1.005f };
+			sfSprite_scale(tux, scale);
+			show_tux++;
+		}
+
+		if (show_tux > 0) {
+			sfRenderWindow_drawSprite(window, tux, NULL);
+		}
 
 		/* Facem swap intre buffer-ul din fata (ecranul) si 
 		   buffer-ul din spate. */
@@ -155,22 +210,24 @@ void paddle_initialize(sfRectangleShape *paddle, sfVideoMode videoMode)
 	sfRectangleShape_setPosition(paddle, paddle_pos);
 }
 
-void paddle_update(sfRectangleShape *paddle)
+void paddle_update(sfRectangleShape *paddle, sfVideoMode videoMode)
 {
-	if (sfKeyboard_isKeyPressed(sfKeyLeft)) {
-		sfVector2f offset_left = { -4.0f, 0.f };
+	sfVector2f pos = sfRectangleShape_getPosition(paddle);
+
+	if (sfKeyboard_isKeyPressed(sfKeyLeft) && pos.x > 0) {
+		sfVector2f offset_left = { -6.0f, 0.f };
 		sfRectangleShape_move(paddle, offset_left);
 	}
 
-	if (sfKeyboard_isKeyPressed(sfKeyRight)) {
-		sfVector2f offset_right = { 4.0f, 0.f };
+	if (sfKeyboard_isKeyPressed(sfKeyRight) && pos.x < videoMode.width) {
+		sfVector2f offset_right = { 6.0f, 0.f };
 		sfRectangleShape_move(paddle, offset_right);
 	}
 }
 
 void ball_initialize(sfCircleShape *ball, sfVideoMode videoMode)
 {
-	float ball_radius = 5.f;
+	float ball_radius = 10.f;
 
 	ball_velocity.x = ball_speed;
 	ball_velocity.y = ball_speed;
@@ -184,15 +241,26 @@ void ball_initialize(sfCircleShape *ball, sfVideoMode videoMode)
 	ball_origin.x = ball_radius / 2.f;
 	ball_origin.y = ball_radius / 2.f;
 
+	sfTexture *snowball = sfTexture_createFromFile("resurse/sprites/snowball2.png", NULL);
+	if (!snowball)
+		printf("Nu am putut incarca zapada.");
+
+	sfTexture_setSmooth(snowball, sfTrue);
 	sfCircleShape_setRadius(ball, ball_radius);
 	sfCircleShape_setPosition(ball, ball_pos);
-	sfCircleShape_setFillColor(ball, sfWhite);
+	//sfCircleShape_setFillColor(ball, sfWhite);/
+	sfCircleShape_setTexture(ball, snowball, sfTrue);
 	sfCircleShape_setOrigin(ball, ball_origin);
 }
 
-void ball_update(sfCircleShape *ball)
+int ball_update(sfCircleShape *ball, sfVideoMode videoMode)
 {	
+	sfVector2f pos = sfCircleShape_getPosition(ball);
+	if (pos.y > videoMode.height)
+		return 1;
+
 	sfCircleShape_move(ball, ball_velocity);
+	return 0;
 }
 
 void ball_check_collision_paddle(sfCircleShape *ball, sfRectangleShape *paddle)
@@ -243,7 +311,6 @@ int ball_check_collision_walls(sfCircleShape *ball, sfVideoMode videoMode)
 void ball_check_collision_level(sfCircleShape *ball, level_t *level)
 {
 	/* Collision with bricks. */
-
 	for (int i = 0; i < level->rows; i++) {
 		for (int j = 0; j < level->cols; j++) {
 			if (level->bricks_life[i][j] == 0)

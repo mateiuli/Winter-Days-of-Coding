@@ -1,6 +1,10 @@
 #include "level.h"
 #include <stdio.h>
 
+static sfTexture *box_purple;
+static sfTexture *box_orange;
+static sfTexture *box_blue;
+
 int level_read(const char *filename, level_t *level)
 {
 	/* Ne asiguram ca parametrii primiti nu sunt niste 
@@ -51,6 +55,10 @@ int level_read(const char *filename, level_t *level)
 		.y = BRICK_HEIGHT
 	};
 
+	box_purple = sfTexture_createFromFile("resurse/boxes/box_purple_s.png", NULL);
+	box_orange = sfTexture_createFromFile("resurse/boxes/box_orange_s.png", NULL);
+	box_blue = sfTexture_createFromFile("resurse/boxes/box_blue_s.png", NULL);
+
 	for (int i = 0; i < level->rows; i++) {
 		for (int j = 0; j < level->cols; j++) {
 			/* Daca aceasta caramida (i, j) are valoarea 0 citita din fisier,
@@ -76,11 +84,14 @@ int level_read(const char *filename, level_t *level)
 			
 			/* Setam culoarea caramizii. */
 			if (level->bricks_life[i][j] == 1)
-				sfRectangleShape_setFillColor(level->bricks_shape[i][j], sfGreen);
+				sfRectangleShape_setTexture(level->bricks_shape[i][j], box_blue, sfTrue);
+				//sfRectangleShape_setFillColor(level->bricks_shape[i][j], sfGreen);
 			else if (level->bricks_life[i][j] == 2)
-				sfRectangleShape_setFillColor(level->bricks_shape[i][j], sfYellow);
+				sfRectangleShape_setTexture(level->bricks_shape[i][j], box_purple, sfTrue);
+				//sfRectangleShape_setFillColor(level->bricks_shape[i][j], sfYellow);
 			else if (level->bricks_life[i][j] == 3)
-				sfRectangleShape_setFillColor(level->bricks_shape[i][j], sfRed);
+				sfRectangleShape_setTexture(level->bricks_shape[i][j], box_orange, sfTrue);
+				//sfRectangleShape_setFillColor(level->bricks_shape[i][j], sfRed);
 			else 
 				sfRectangleShape_setFillColor(level->bricks_shape[i][j], sfBlue);
 		}
@@ -91,4 +102,18 @@ int level_read(const char *filename, level_t *level)
 
 	/* Returnam valoare de succes, 1. */
 	return 1;
+}
+
+void level_update(level_t *level)
+{
+	for (int i = 0; i < level->rows; i++) {
+		for (int j = 0; j < level->cols; j++) {
+			if (level->bricks_life[i][j] == 1)
+				sfRectangleShape_setTexture(level->bricks_shape[i][j], box_blue, sfTrue);
+			else if (level->bricks_life[i][j] == 2)
+				sfRectangleShape_setTexture(level->bricks_shape[i][j], box_purple, sfTrue);
+			else if (level->bricks_life[i][j] == 3)
+				sfRectangleShape_setTexture(level->bricks_shape[i][j], box_orange, sfTrue);
+		}
+	}
 }
