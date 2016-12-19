@@ -50,9 +50,9 @@ collision_t get_collision(sfRectangleShape *rectangle, sfCircleShape *ball)
 	// Let's calculate how much the ball intersects the brick
 	// in every direction.
 	float overlapLeft	= b_right - r_left;
-	float overlapRight	= b_right - r_left;
+	float overlapRight	= r_left - b_right;
 	float overlapTop	= b_bottom - r_top;
-	float overlapBottom	= b_bottom - r_top;
+	float overlapBottom = r_top - b_bottom;
 
 	// If the magnitude of the left overlap is smaller than the
 	// right one we can safely assume the ball hit the brick

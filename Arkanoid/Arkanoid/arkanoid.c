@@ -35,7 +35,7 @@ sfVector3f read_from_arduino();
 
 int main()
 {
-	connect_to_arduino();
+	//connect_to_arduino();
 
 	/* Initializare structura cu dimensiunile fereastre. */
 	sfVideoMode videoMode = {
@@ -99,9 +99,9 @@ int main()
 	int show_tux = 0;
 
 	/* Music */
-	sfMusic *music = sfMusic_createFromFile("resurse/music/train.ogg");
-	sfMusic_setLoop(music, sfTrue);
-	sfMusic_play(music);
+	//sfMusic *music = sfMusic_createFromFile("resurse/music/train.ogg");
+	//sfMusic_setLoop(music, sfTrue);
+	//sfMusic_play(music);
 
 	/* Bucla principala a jocului. Cat timp fereastra este inca deschisa
 	   jocul continua. Cand fereastra este inchisa se va iesi din bucla. */
