@@ -291,7 +291,110 @@
 			</pre>
 		</div>
 
-		
+	<br/><br/>
+	Mai jos gasiti un exemplu complet care porneste o fereastra si deseneaza un dreptunghi cu dimensiunea 200px x 100px, aflat la pozitia (300, 200), umplut cu culoarea rosu. 
+	<pre class="brush: c;">
+	#include &lt;stdio.h&gt;
+	#include &lt;math.h&gt;
+	#include &lt;SFML/Graphics.h&gt;
+	#include &lt;SFML/Audio.h&gt;
+
+	#define EXIT_FAILURE    -1
+	#define EXIT_SUCCESS     0
+
+	int main()
+	{
+		/* Initializare structura cu dimensiunile fereastre. */
+		sfVideoMode videoMode = {
+			.width = 800,		/* Latimea ferestrei, in pixeli. */
+			.height = 600,		/* Inaltimea ferestrei, in pixeli. */
+			.bitsPerPixel = 32	/* Cantitatea de informatie a ficarui pixel. */
+		};
+
+		/* Crearea efectiva a ferestrei de desenare, cu dimensiunile
+		specificate anterior. */
+		sfRenderWindow *window = sfRenderWindow_create(
+			videoMode,
+			"Winter Days of Coding",
+			sfClose,
+			NULL
+		);
+		if (!window)
+			return EXIT_FAILURE;
+
+		/* Creare dreptunghi. */
+		sfRectangleShape *rectangle = sfRectangleShape_create();
+		/* Dimensiunea dreptunghului. */
+		sfVector2f size = {200, 100};
+		sfRectangleShape_setSize(rectangle, size);
+		/* Pozitia dreptunghiului pe ecran. */
+		sfVector2f pos = { 300, 200 };
+		sfRectangleShape_setPosition(rectangle, pos);
+		/* Culoarea dreptunghiului. */
+		sfRectangleShape_setFillColor(rectangle, sfRed);
+
+		while (sfWindow_isOpen(window))
+		{
+			/* Bucla principala a jocului. */
+			sfEvent event;
+			while (sfRenderWindow_pollEvent(window, &event)) {
+				/* Tratam fiecare tip de eveniment diferit. */
+				/* Evenimentul de inchidere de fereastra - cand apasam pe X. */
+				if (event.type == sfEvtClosed)
+					sfRenderWindow_close(window);
+
+				if (event.type == sfEvtKeyPressed && event.key.code == sfKeyEscape)
+					sfRenderWindow_close(window);
+			}
+
+			/* Golire fereastra. Sterge toata suprafata de desenare pentru a desena din nou. */
+			sfRenderWindow_clear(window, sfBlack);
+
+			/* Desenare dreptunghi pe suprafata feresterei. */
+			sfRenderWindow_drawRectangleShape(window, rectangle, NULL);
+
+			/* Facem swap intre buffer-ul din fata (ecranul) si
+			   buffer-ul din spate. */
+			sfRenderWindow_display(window);
+		}
+
+		/* ... eliberare resurse ... */
+		sfRenderWindow_destroy(window);
+
+		return 0;
+	}
+	</pre>
+		<br/>
+		Rezultatul obtinut arata asa: <br/><br/>
+		<img src="res/window_rectangle.png" width="50%" align="center"/>
+		<br/><br/>
+		Mai intai este creata fereastra cu dimensiunea 800px x 600px. Apoi este creat un dreptunghi care este reprezentat grafic prin intermediul structurii <b>sfRectangleShape</b>. Functia <b>sfRectangleShape_create()</b> returneaza un pointer catre locatia de memorie unde a fost alocat spatiu pentru variabila.
+		<br/><br/>
+		In continuare sunt setate proprietatile dreptunghiului. Mai exact, se seteaza dimensiunea acestuia (latime 200px, inaltime 100px), pozitia pe ecran (300, 200) si culoarea cu care este umplut (rosu).
+		<br/><br/>
+		In bucla principala am adaugat un element nou, tratarea evenimentelor de la primite de la sistemul de operare. Sunt doua evenimente pe care dorim sa le tratam, ambele ce duc la inchiderea ferestrei: primul eveniment, <b>sfEvtClosed</b> se refera daca a utilizatorul a dat click pe butonul X al ferestrei. Al doilea eveniment se refera daca utilizatorul a apasat tasta de escape, in cazul acesta ne dorim ca jocul sa se inchida. 
+		<br/><br/>
+		Evenimentele sunt impartite pe categorii, in funcie de sursa care le-a trimis. Utilizatorul este cel care le genereaza prin intercatunea cu mouse-ul, tastatura sau joystick-ul. Structura <b>sfEvent</b> are un camp care specifica tipul evenimentului si un camp aditional in care se specifica sursa exacta.
+		<br/></br>
+		Tipuri de evenimente:
+		<ul>
+			<li><b>sfEvtKeyPressed</b> - generat cand o tasta a fost apasata. </li> 
+			<li><b>sfEvtKeyReleased</b> - generat cand o tasta apasata a fost eliberata.</li>
+			<li><b>sfEvtMouseButtonPressed</b> - generat cand oricare buton al mouse-ului este apasat. </li> 
+			<li><b>sfEvtMouseButtonReleased</b> - generat cand un buton de pe mouse este eliberat</li> 
+		</ul>
+		<br/>
+		Lista completa cu evenimente poate fi vazuta in documentatia oficiala a bibliotecii (<a href="res/SFML.chm">click</a> - cautare sfEventType).
+		<br/></br>
+		Dupa ce sunt tratate evenimentele, primul lucru pe care trebuie sa-l este sa stergem fereastra. Dorim sa desenam totul din nou. Daca nu golim fereastra, ce vom desena la iteratia curenta va fi suprapus peste ce era deja desenat la iteratia precedenta. Acest lucru il face cu ajutorul functiei <b>sfRenderWindow_clear()</b>. Functia primeste ca parametrii fereastra ce trebuie golita si o culoare cu care sa o goleasca. In cazul de fata folosim negru.
+		<br/><br/>
+
+		Pentru fiecare forma geometrica posibila pe care biblioteca CSFML ne-o pune la dispozitie avem cate o functie care o si deseneaza pe fereastra. Pentru cazul unui <b>sfRectangleShape</b> avem functia <b>sfRenderWindow_drawRectangleShape()</b>.
+
+		<br/></br>
+		De fiecare data cand desenam ceva intr-o fereastra, obiectu respectiv nu este desenat instantaneu. Orice fereastra cu un context OpenGL deschis are in spate doua buffere. La o iteratie, intr-un buffer se deseneaza iar celalalt este afisat pe ecran. Niciodată nu desenăm în buffer-ul care este legat la display. Dacă am face asta, am vedea efectiv cum se desenează pe ecran și nu ne dorim acest lucru. Ne dorim ca tot contextul să fie desenat dintr-o singură instrucțiune. După ce contextul a fost desenat complet se face swap intre cele doua buffere. 
+		<br/><br/>
+		<img src="res/double_buffering.png" />
 	</p>
 
 	<p>
@@ -323,7 +426,57 @@
 				<b>sfCircleShape_setFillColor(sfCircleShape *shape, sfColor color)</b>
 			</li>
 		</ul>
+
+		Pentru desenarea unui dreptunghi se procodează în același mod ca în cazul desenării unui dreptunghi. În loc să folosim structura <b>sfRectangleShape</b> folosim <b>sfCircleShape</b>. Toate funcțiile valabile pentru drepunghi sunt valabile și pentru cerc. Prefixul funcțiilor de de modificare a culorii, poziției și dimensiunii trebuie schimbat din sfRectangleShape_ în sfCircleShape_.
+
 	</p>
+
+	<p>
+	<h3>4.5. Deplasare obiecte pe ecran</h3>
+	Am enumerat mai devreme o parte din funcțiile ce pot fi folosite pentru modificarea parametrilor din structurile atașate unui dreptungh și cerc. Printre acestea aveam o funcție care ne permitea să setăm poziția obiectului prin două coordonate (x, y). Funcția se numea <b>sfRectangleShape_setPosition()</b> pentru dreptughi și <b>sfCircleShape_setPosition()</b>. Atunci când apelăm aceste funcții obiectul este mutat direct la noile coordonate. Dacă facem asta o să vedem cum obiectul este ”teleportat” în noua locație. Nu ne dorim să schimbăm poziția cu totul, ci vrem doar să îl deplasăm într-o parte sau în alta cu o anumita distanță față de poziția actuală. Pentru a face acest lucru avem funcția <b>sfRectangleShape_move()</b>. Ea primește ca parametrii un dreptunghi și un <b>sfVector2f</b> reprezentând distanța pe axa OX și OY cu care să fie deplasat.
+
+	<br/><br/>
+	Am văzut cum tratam evenimentele mai sus, evenimente de ieșire din aplicație, tastă apăsată, mouse deplasat, etc. Există o scurtătura în detectarea lor fără să mai întrebam sistemul de operare dacă are un eveniment pentru noi. Acest lucru îl putem face în modul următor:
+	<pre class="brush: c;">
+	if (sfKeyboard_isKeyPressed(sfKeyLeft)) 
+	{
+		/* Actiune care se executa cand sageanta stanga este apasata. */
+	}
+	</pre>
+
+
+	Pentru a deplasa un obiect pe ecran atunci cand apasam sagetile sus, stanga, jos si dreapta trebuie sa facem aceste verificari in bucla principala, inainte sa facem desenarea pentru iteratia urmatoare.
+
+	<pre class="brush: c;">
+	float speed = 0.05f;
+
+	if (sfKeyboard_isKeyPressed(sfKeyLeft)) 
+	{
+		sfVector2f offset = {-speed, 0};
+		sfRectangleShape_move(rectangle, offset);
+	}
+
+	if (sfKeyboard_isKeyPressed(sfKeyRight)) 
+	{
+		sfVector2f offset = { speed, 0 };
+		sfRectangleShape_move(rectangle, offset);
+	}
+
+	if (sfKeyboard_isKeyPressed(sfKeyUp)) 
+	{
+		sfVector2f offset = { 0, -speed };
+		sfRectangleShape_move(rectangle, offset);		
+	}
+	
+	if (sfKeyboard_isKeyPressed(sfKeyDown)) 
+	{
+		sfVector2f offset = { 0, speed };
+		sfRectangleShape_move(rectangle, offset);
+	}
+	</pre>
+
+	</p>
+
 
 	<!-- Anatomia -->
 	<p>

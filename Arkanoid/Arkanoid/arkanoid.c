@@ -6,6 +6,7 @@
 #include <SFML/Audio.h>
 #include "level.h"
 #include "utils.h"
+#include "rs232.h"
 
 #define EXIT_FAILURE	-1
 #define EXIT_SUCCESS	 0
@@ -26,8 +27,16 @@ void ball_check_collision_paddle(sfCircleShape *ball, sfRectangleShape *paddle);
 void ball_check_collision_level(sfCircleShape *ball, level_t *level);
 int ball_check_collision_walls(sfCircleShape *ball, sfVideoMode videoMode);
 
+/* Arduino */
+static int com_port = 7;
+void connect_to_arduino();
+void disconnect_from_arduino();
+sfVector3f read_from_arduino();
+
 int main()
 {
+	connect_to_arduino();
+
 	/* Initializare structura cu dimensiunile fereastre. */
 	sfVideoMode videoMode = {
 		.width = 800,
@@ -214,14 +223,25 @@ void paddle_update(sfRectangleShape *paddle, sfVideoMode videoMode)
 {
 	sfVector2f pos = sfRectangleShape_getPosition(paddle);
 
-	if (sfKeyboard_isKeyPressed(sfKeyLeft) && pos.x > 0) {
-		sfVector2f offset_left = { -6.0f, 0.f };
-		sfRectangleShape_move(paddle, offset_left);
-	}
+	//if (sfKeyboard_isKeyPressed(sfKeyLeft) && pos.x > 0) {
+	//	sfVector2f offset_left = { -6.0f, 0.f };
+	//	sfRectangleShape_move(paddle, offset_left);
+	//}
 
-	if (sfKeyboard_isKeyPressed(sfKeyRight) && pos.x < videoMode.width) {
+	//if (sfKeyboard_isKeyPressed(sfKeyRight) && pos.x < videoMode.width) {
+	//	sfVector2f offset_right = { 6.0f, 0.f };
+	//	sfRectangleShape_move(paddle, offset_right);
+	//}
+
+	sfVector3f acc = read_from_arduino();
+
+	if (acc.y < -3.5f) {
 		sfVector2f offset_right = { 6.0f, 0.f };
 		sfRectangleShape_move(paddle, offset_right);
+	}
+	else if(acc.y > 3.5f) {
+		sfVector2f offset_left = { -6.0f, 0.f };
+		sfRectangleShape_move(paddle, offset_left);
 	}
 }
 
@@ -329,3 +349,66 @@ void ball_check_collision_level(sfCircleShape *ball, level_t *level)
 	}
 }
 
+void connect_to_arduino()
+{
+	unsigned char buf[4096];
+	char mode[] = { '8', 'N', '1', 0 };
+
+	com_port = 7;
+	if (RS232_OpenComport(com_port, 9600, mode))
+	{
+		printf("Can not open comport\n");
+	}
+	else {
+		printf("Connected to arduino\n");
+	}
+}
+
+void disconnect_from_arduino()
+{
+
+}
+
+sfVector3f read_data_from_arduino()
+{
+	char buff[128] = { 0 };
+	char c = NULL, *p = buff;
+	sfVector3f acc = { 0, 0, 0 };
+
+	while (c != '\n') {
+		int bytes = RS232_PollComport(com_port, &c, 1);
+
+		if (c == '\n') {
+			*p = NULL;
+			sscanf(buff, "%f", &acc.y);
+			p = buff;
+			return acc;
+		}
+
+		if (bytes > 0) {
+			*p = c;
+			p++;
+		}
+	}
+
+	return acc;
+}
+
+sfVector3f read_from_arduino()
+{
+	const int reads = 1;
+	sfVector3f t_acc = { 0, 0, 0 };
+
+	for (int i = 0; i < reads; ++i) {
+		sfVector3f acc = read_data_from_arduino();
+		//t_acc.x += acc.x;
+		t_acc.y += acc.y;
+		//t_acc.z += acc.z;
+	}
+
+	//t_acc.x /= reads;
+	t_acc.y /= reads;
+	//t_acc.z /= reads;
+
+	return t_acc;
+}
