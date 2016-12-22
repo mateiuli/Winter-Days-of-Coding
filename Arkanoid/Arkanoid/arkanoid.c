@@ -223,17 +223,17 @@ void paddle_update(sfRectangleShape *paddle, sfVideoMode videoMode)
 {
 	sfVector2f pos = sfRectangleShape_getPosition(paddle);
 
-	//if (sfKeyboard_isKeyPressed(sfKeyLeft) && pos.x > 0) {
-	//	sfVector2f offset_left = { -6.0f, 0.f };
-	//	sfRectangleShape_move(paddle, offset_left);
-	//}
+	if (sfKeyboard_isKeyPressed(sfKeyLeft) && pos.x > 0) {
+		sfVector2f offset_left = { -6.0f, 0.f };
+		sfRectangleShape_move(paddle, offset_left);
+	}
 
-	//if (sfKeyboard_isKeyPressed(sfKeyRight) && pos.x < videoMode.width) {
-	//	sfVector2f offset_right = { 6.0f, 0.f };
-	//	sfRectangleShape_move(paddle, offset_right);
-	//}
+	if (sfKeyboard_isKeyPressed(sfKeyRight) && pos.x < videoMode.width) {
+		sfVector2f offset_right = { 6.0f, 0.f };
+		sfRectangleShape_move(paddle, offset_right);
+	}
 
-	sfVector3f acc = read_from_arduino();
+	/*sfVector3f acc = read_from_arduino();
 
 	if (acc.y < -3.5f) {
 		sfVector2f offset_right = { 6.0f, 0.f };
@@ -242,7 +242,7 @@ void paddle_update(sfRectangleShape *paddle, sfVideoMode videoMode)
 	else if(acc.y > 3.5f) {
 		sfVector2f offset_left = { -6.0f, 0.f };
 		sfRectangleShape_move(paddle, offset_left);
-	}
+	}*/
 }
 
 void ball_initialize(sfCircleShape *ball, sfVideoMode videoMode)
